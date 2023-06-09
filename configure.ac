@@ -1,5 +1,5 @@
-AC_PREREQ(2.61)
-AC_INIT(google-authenticator, 1.09, habets@google.com)
+AC_PREREQ([2.71])
+AC_INIT([google-authenticator],[1.09],[habets@google.com])
 AC_CONFIG_SRCDIR([src/google-authenticator.c])
 AC_CONFIG_AUX_DIR([build])
 AC_CONFIG_MACRO_DIR([build])
@@ -15,7 +15,6 @@ AM_MAINTAINER_MODE([enable])
 
 LT_INIT
 AC_PROG_CC
-AC_PROG_CC_STDC
 
 AC_CHECK_HEADERS([sys/fsuid.h])
 AC_CHECK_FUNCS([ \
@@ -76,7 +75,7 @@ AC_LANG_POP(C)
 
 AC_SEARCH_LIBS([dlopen], [dl])
 
-AC_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([Makefile contrib/rpm.spec])
 AC_OUTPUT
 
