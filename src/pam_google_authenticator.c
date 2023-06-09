@@ -70,7 +70,7 @@ typedef struct Params {
   int        fixed_uid;
   int        no_increment_hotp;
   uid_t      uid;
-  enum { PROMPT = 0, TRY_FIRST_PASS, USE_FIRST_PASS } pass_mode;
+  enum { PROMPT = 0, TRY_FIRST_PASS, USE_FIRST_PASS, NO_PASS } pass_mode;
   int        forward_pass;
   int        debug;
   int        no_strict_owner;
@@ -671,7 +671,7 @@ static int write_file_contents(pam_handle_t *pamh,
       goto cleanup;
     }
   }
-  
+
   if (rename(tmp_filename, secret_filename) != 0) {
     err = errno;
     log_message(LOG_ERR, pamh, "rename(): %s", strerror(err));
@@ -1792,6 +1792,8 @@ static int parse_args(pam_handle_t *pamh, int argc, const char **argv,
       params->no_strict_owner = 1;
     } else if (!strcmp(argv[i], "debug")) {
       params->debug = 1;
+    } else if (!strcmp(argv[1],"no_pass")) {
+      params->pass_mode = NO_PASS;
     } else if (!strcmp(argv[i], "try_first_pass")) {
       params->pass_mode = TRY_FIRST_PASS;
     } else if (!strcmp(argv[i], "use_first_pass")) {
@@ -1950,7 +1952,8 @@ static int google_authenticator(pam_handle_t *pamh,
           continue;
         }
         if (params.pass_mode == PROMPT ||
-            params.pass_mode == TRY_FIRST_PASS) {
+            params.pass_mode == TRY_FIRST_PASS ||
+            params.pass_mode == NO_PASS) {
           if (!saved_pw) {
             // If forwarding the password to the next stacked PAM module,
             // we cannot tell the difference between an eight digit scratch
@@ -2060,7 +2063,7 @@ static int google_authenticator(pam_handle_t *pamh,
     // Update the system password, if we were asked to forward
     // the system password. We already removed the verification
     // code from the end of the password.
-    if (rc == PAM_SUCCESS && params.forward_pass) {
+    if (rc == PAM_SUCCESS && params.pass_mode != NO_PASS && params.forward_pass) {
       if (!pw || pam_set_item(pamh, PAM_AUTHTOK, pw) != PAM_SUCCESS) {
         rc = PAM_AUTH_ERR;
       }
